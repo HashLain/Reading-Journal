@@ -1,6 +1,12 @@
 #include "JournalEntry.h"
 
+int JournalEntry::nextId = 1;
+
 JournalEntry::JournalEntry(const std::string& bookTitle, const std::string& author, const std::string& genre, const std::string& entry, const std::string& startDate, const std::string& endDate) : bookTitle(bookTitle), author(author), genre(genre), entry(entry), startDate(startDate), endDate(endDate) {}
+
+int JournalEntry::getId() const {
+  return id;
+}
 
 std::string JournalEntry::getBookTitle() const {
   return bookTitle;
@@ -48,6 +54,10 @@ void JournalEntry::setStartDate(const std::string& startDate) {
 
 void JournalEntry::setEndDate(const std::string& endDate) {
   this->endDate = endDate;
+}
+
+void JournalEntry::setId(int id) {
+  this->id = id;
 }
 
 void JournalEntry::appendEntry(const std::string& addEntry) {

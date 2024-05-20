@@ -9,7 +9,7 @@
 class Journal {
   private:
     std::vector<JournalEntry> pages;
-    std::unordered_map<std::string, std::vector<JournalEntry>> categories;
+    std::unordered_map<std::string, std::vector<int>> categories;
 
   public:
     
@@ -21,7 +21,7 @@ class Journal {
 
     void createCategory(const std::string& category);
 
-    void addEntryToCategory(const std::string& category, const JournalEntry& page);
+    void addEntryToCategory(const std::string& category, int entryId);
 
     bool categoryExists(const std::string& category) const;
 

@@ -12,16 +12,31 @@ std::vector<JournalEntry> Journal::getEntries() const {
   return pages; 
 }
 
-std::vector<JournalEntry> Journal::getEntriesByCatergory(const std::string& category) const {
-  if (categories.find(category) != categories.end()) {
-    return categories.at(category);
+void Journal::createCategory(const std::string& category) {
+  if (categories.find(category) == categories.end()) {
+    categories[category] = std::vector<int>();
   }
-  return {};
 }
 
-void Journal::addEntryToCategory(const std::string& category, const JournalEntry& page) {
+std::vector<JournalEntry> Journal::getEntriesByCatergory(const std::string& category) const {
+  std::vector<JournalEntry> result;
   if (categories.find(category) != categories.end()) {
-    categories[category].push_back(page);
+    const auto& entryIds = categories.at(category);
+    for (int id : entryIds) {
+      for (const auto& entry : pages) {
+        if (entry.getId() == id) {
+          result.push_back(entry);
+          break;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+void Journal::addEntryToCategory(const std::string& category, int entryId) {
+  if (categories.find(category) != categories.end()) {
+    categories[category].push_back(entryId);
   }
 }
 
@@ -37,26 +52,30 @@ void Journal::deleteCategory(const std::string& category) {
 }
 
 void Journal::saveToFile(std::string& filename) const {
-  std::ofstream outFile(filename);
-  if (!outFile) {
-    throw std::runtime_error("Unable to open file: " + filename);
+  std::ofstream outfile(filename);
+  if (!outfile) {
+    throw std::runtime_error("Unable to write into file " + filename);
   }
 
-  for (const auto& categoryEntry : categories) {
-    outFile << "CATEGORY:" << categoryEntry.first << '\n';
-    for (const auto& entry : categoryEntry.second) {
-      outFile << "ENTRY\n"
-              << entry.getBookTitle() << '\n'
-              << entry.getAuthor() << '\n'
-              << entry.getGenre() << '\n'
-              << entry.getEntry() << '\n'
-              << entry.getStartDate() << '\n'
-              << entry.getEndDate() << '\n'
-              << "---\n";
+  for (const auto& entry : pages) {
+    outfile << "ENTRY" << std::endl;
+    outfile << entry.getId() << std::endl;
+    outfile << entry.getBookTitle() << std::endl;
+    outfile << entry.getAuthor() << std::endl;
+    outfile << entry.getGenre() << std::endl;
+    outfile << entry.getEntry() << std::endl;
+    outfile << entry.getStartDate() << std::endl;
+    outfile << entry.getEndDate() << std::endl;
+  }
+
+  for (const auto& categoryPair : categories) {
+    outfile << "CATEGORY:" << categoryPair.first << std::endl;
+    for (int entryId : categoryPair.second) {
+      outfile << entryId << std::endl;
     }
+    outfile << "END_CATEGORY" << std::endl;
   }
-
-  outFile.close();
+  outfile.close();
 }
 
 void Journal::loadFromFile(const std::string& filename) {
@@ -70,31 +89,33 @@ void Journal::loadFromFile(const std::string& filename) {
 
   std::string line;
   std::string category;
+  int id;
   std::string bookTitle, author, genre, entry, startDate, endDate;
 
-  while(std::getline(inFile, line)) {
-    
-    if (line.find("CATEGORY:") == 0) {
-      category = line.substr(9);
-      createCategory(category);
-
-    } else if (line == "ENTRY") {
-      
+  while (std::getline(inFile, line)) {
+    if (line == "ENTRY") {
+      inFile >> id; inFile.ignore();
       std::getline(inFile, bookTitle);
       std::getline(inFile, author);
       std::getline(inFile, genre);
       std::getline(inFile, entry);
       std::getline(inFile, startDate);
       std::getline(inFile, endDate);
-      std::getline(inFile, line);
 
       JournalEntry newEntry(bookTitle, author, genre, entry, startDate, endDate);
+      newEntry.setId(id);
       addEntry(newEntry);
-
-      if (!category.empty()) {
-        addEntryToCategory(category, newEntry);
-      }
-
+    } 
+    else if (line.find("CATEGORY:") == 0){
+      category = line.substr(9);
+      createCategory(category);
+    }
+    else if (line == "END_CATEGORY") {
+      category.clear();
+    }
+    else if (!category.empty()) {
+      int entryId = std::stoi(line);
+      addEntryToCategory(category, entryId);
     }
   }
 

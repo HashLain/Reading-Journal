@@ -5,6 +5,8 @@
 
 class JournalEntry {
   private:
+    static int nextId;
+    int id;
     std::string bookTitle;
     std::string author;
     std::string genre;
@@ -17,6 +19,7 @@ class JournalEntry {
     JournalEntry(const std::string& bookTitle, const std::string& author, const std::string& genre = "", const std::string& entry = "", const std::string& startDate = "", const std::string& endDate = "");
 
     //Getters
+    int getId() const;
     std::string getBookTitle() const;
     std::string getAuthor() const;
     std::string getGenre() const;
@@ -31,6 +34,7 @@ class JournalEntry {
     void setEntry(const std::string& entry);
     void setStartDate(const std::string& startDate);
     void setEndDate(const std::string& endDate);
+    void setId(int id);
 
     //Update for Entry
     void appendEntry(const std::string& addEntry);
