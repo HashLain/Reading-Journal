@@ -1,7 +1,7 @@
 #ifndef JOURNAL_H
 #define JOURNAL_H
 
-#include "JournalEntry.h"
+#include "../JournalEntry/JournalEntry.h"
 #include <vector>
 #include <unordered_map>
 #include <string>

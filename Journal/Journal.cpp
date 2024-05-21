@@ -1,5 +1,5 @@
 #include "Journal.h"
-#include "JournalEntry.h"
+#include "../JournalEntry/JournalEntry.h"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
