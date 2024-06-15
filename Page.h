@@ -2,19 +2,21 @@
 #define PAGE_H
 
 #include <string>
-#include "nlohmann/json.hpp"
-
-struct Page {
-
+private:
   std::string title;
   std::string author;
   std::string genre;
-  std::string text;
-  int rating;
+  std::string entry;
 
-  friend void to_json(nlohmann::json& j, const Page& page);
-  friend void from_json(const nlohmann::json& j, Page& page);
+public:
+  Page(const std::string& title, const std::string& author, const std::string& genre, const std::string& thoughts);
+  std::string getTitle() const;
+  std::string getAuthor() const;
+  std::string getGenre() const;
+  std::string getEntry() const;
+  
+  std::string toData() const;
+  static Page fromDate(const std::string& data);
 
-};
-
+ 
 #endif
