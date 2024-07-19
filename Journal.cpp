@@ -1,79 +1,85 @@
-#include "Journal.h"
+#include <iostream>
+#include <string>
+#include "Book.h"
+#include "JournalDatabase.h"
 
-void Journal::viewPage(Page* page) const {
-  if (page != nullptr) {
-    std::cout << "Title: " << page->getTitle() << std::endl;
-    std::cout << "Author: " << page->getAuthor() << std::endl;
-    std::cout << "Genre: " << page->getGenre() << std::endl;
-    std::cout << "Entry: " << page->getEntry() << std::endl;
-  } else {
-    std::cout << "Entry Not Found" << std::endl;
-  }
-} 
-
-void Journal::addPage(const Page& page) {
-  pages.push_back(page);
+void displayMenu() {
+  std::cout << "Journal Menu\n";
+  std::cout << "1. Add a book\n";
+  std::cout << "2. List all books\n";
+  std::cout << "3. Edit a book\n";
+  std::cout << "4. Delete a book\n";
+  std::cout << "5. Exit\n";
+  std::cout << "Enter a numbered option: ";
 }
 
-std::vector<Page*> Journal::search(const std::string& query) const {
-  vector<Page*> results;
+Book makeBook() {
+  std::string author, title, genre, text;
+  double rating;
 
-  for (const auto&page : pages) {
-    if (page->getTitle().find(query) != std::string::npos) {
-      results.push_back(page);
-    }
-  }
-  return results;
+  std::cout << "Enter author: ";
+  std::getline(std::cin, author);
+  std::cout << "Enter title: ";
+  std::getline(std::cin, title);
+  std::cout << "Enter genre: ";
+  std::getline(std::cin, genre);
+  std::cout << "Enter rating: ";
+  std::cin >> rating;
+  std::cin.ignore();
+  std::cout << "Enter text: ";
+  std::getline(std::cin, text);
+
+  return Book(author, title, genre, rating, text);
 }
 
-void Journal::editPage(Page* page, const Page& newPage) {
-  if (page != nullptr) {
-    *page = newPage;
-  } else {
-    std::cout << "Book Not Found" << std::endl;
-  }
-}
+int main() {
+  JournalDatabase db;
+  db.createTable();
 
-void Journal::deletePage(Page* page) {
-  auto it = std::find(pages.begin(), pages.end(), page);
-  if (it != pages.end()) {
-    delete it*;
-    pages.erase(it);
-    saveJournal();
-  } else {
-    std::cout << "Book Not Found" << std::endl;
-  }
-}
+  int choice;
+  while (true) {
+    displayMenu();
+    std::cin >> choice;
+    std::cin.ignore();
 
-
-void Journal::saveJournal() {
-  std::ofstream outFile(filename);
-
-  if (outFile.is_open()) {
-    for (const auto& page : pages) {
-      outFile << page.toData() << std::endl;
+    switch (choice) {
+      case 1: {
+        Book book = makeBook();
+        db.insertEntry(book);
+        break;
       }
-      outFile.close();
-      std::cout << "Journal saved successfully." << std::endl;
-    } else {
-        std::cerr << "Error: Unable to save journal to file." << std::endl;
+      case 2: {
+        db.listEntries();
+        break;
+      }
+      case 3: {
+        int id;
+        db.listEntries();
+        std::cout << "Enter book id you wish to edit: ";
+        std::cin >> id;
+        std::cin.ignore();
+        Book book = makeBook();
+        db.updateEntry(id, book);
+        break;
+      }
+      case 4: {
+        int id;
+        db.listEntries();
+        std::cout << "Enter id of book you wish to delete: ";
+        std::cin >> id;
+        std::cin.ignore();
+        db.deleteEntry(id);
+        break;
+      }
+      case 5: {
+        return 0;
+      }
+      default: {
+        std::cout << "Invalid option. Please select one of the numbered choices.\n";
+        break;
+      }
     }
-}
-
-void Journal::loadJournal() {
-  std::ifstream inFile(filename);
-
-  if (inFile.is_open()) {
-    pages.clear();
-    std::string line;
-    while (std::getline(inFile, line)) {
-      Page newPage = Page::fromData(line);
-      pages.push_back(newPage);
-    }
-
-    inFile.close();
-    std::cout << "Journal loaded successfully." << std::endl;
-  } else {
-    std::cerr << "Error: Unable to load journal from file." << std::endl;
   }
+
+  return 0;
 }
